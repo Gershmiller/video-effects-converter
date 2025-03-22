@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Effects Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .upload-container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .video-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .video-box {
+            flex: 1 1 45%;
+            min-width: 300px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .video-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        video, canvas {
+            width: 100%;
+            max-height: 400px;
+            background-color: #000;
+            border-radius: 4px;
+        }
+        .controls {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .slider-container {
+            margin-bottom: 15px;
+        }
+        .slider-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .slider-container input {
+            width: 100%;
+        }
+        .value-display {
+            display: inline-block;
+            margin-left: 10px;
+            font-weight: normal;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .file-input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        #status {
+            text-align: center;
+            margin: 10px 0;
+            color: #666;
+        }
+        .effect-selector {
+            margin-bottom: 15px;
+        }
+        .effect-selector label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .color-picker-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .color-picker-container label {
+            font-weight: bold;
+            min-width: 120px;
+        }
+        .download-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        #downloadBtn {
+            background-color: #2196F3;
+        }
+        #downloadBtn:hover {
+            background-color: #0b7dda;
+        }
+    </style>
+</head>
+<body>
+    <h1>Video Effects Converter</h1>
+    
+    <div class="upload-container">
+        <input type="file" id="videoInput" class="file-input" accept="video/*">
+        <button id="uploadBtn">Upload Video</button>
+    </div>
+    
+    <div class="controls">
+        <div class="effect-selector">
+            <label for="effectType">Effect Type</label>
+            <select id="effectType">
+                <option value="dots">Dots</option>
+                <option value="gradient">Gradient Overlay</option>
+                <option value="pixelate">Pixelate</option>
+                <option value="glitch">Glitch</option>
+                <option value="posterize">Posterize</option>
+                <option value="edgeDetection">Edge Detection</option>
+            </select>
+        </div>
+        
+        <!-- Dots effect settings -->
+        <div id="dotsSettings" class="effect-settings">
+            <div class="slider-container">
+                <label for="dotSize">Dot Size <span id="dotSizeValue" class="value-display">10</span></label>
+                <input type="range" id="dotSize" min="2" max="20" value="10">
+            </div>
+            
+            <div class="slider-container">
+                <label for="dotSpacing">Dot Spacing <span id="dotSpacingValue" class="value-display">5</span></label>
+                <input type="range" id="dotSpacing" min="1" max="15" value="5">
+            </div>
+            
+            <div class="slider-container">
+                <label for="threshold">Brightness Threshold <span id="thresholdValue" class="value-display">128</span></label>
+                <input type="range" id="threshold" min="0" max="255" value="128">
+            </div>
+        </div>
+        
+        <!-- Gradient overlay settings -->
+        <div id="gradientSettings" class="effect-settings" style="display: none;">
+            <div class="color-picker-container">
+                <label for="gradientColor1">Start Color</label>
+                <input type="color" id="gradientColor1" value="#ff0000">
+            </div>
+            
+            <div class="color-picker-container">
+                <label for="gradientColor2">End Color</label>
+                <input type="color" id="gradientColor2" value="#0000ff">
+            </div>
+            
+            <div class="slider-container">
+                <label for="gradientOpacity">Opacity <span id="gradientOpacityValue" class="value-display">0.5</span></label>
+                <input type="range" id="gradientOpacity" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            
+            <div class="slider-container">
+                <label for="gradientDirection">Direction <span id="gradientDirectionValue" class="value-display">45°</span></label>
+                <input type="range" id="gradientDirection" min="0" max="360" value="45">
+            </div>
+        </div>
+        
+        <!-- Pixelate effect settings -->
+        <div id="pixelateSettings" class="effect-settings" style="display: none;">
+            <div class="slider-container">
+                <label for="pixelSize">Pixel Size <span id="pixelSizeValue" class="value-display">8</span></label>
+                <input type="range" id="pixelSize" min="2" max="32" value="8">
+            </div>
+        </div>
+        
+        <!-- Glitch effect settings -->
+        <div id="glitchSettings" class="effect-settings" style="display: none;">
+            <div class="slider-container">
+                <label for="glitchIntensity">Glitch Intensity <span id="glitchIntensityValue" class="value-display">5</span></label>
+                <input type="range" id="glitchIntensity" min="1" max="20" value="5">
+            </div>
+            
+            <div class="slider-container">
+                <label for="glitchFrequency">Glitch Frequency <span id="glitchFrequencyValue" class="value-display">3</span></label>
+                <input type="range" id="glitchFrequency" min="1" max="10" value="3">
+            </div>
+        </div>
+        
+        <!-- Posterize effect settings -->
+        <div id="posterizeSettings" class="effect-settings" style="display: none;">
+            <div class="slider-container">
+                <label for="posterizeLevels">Color Levels <span id="posterizeLevelsValue" class="value-display">5</span></label>
+                <input type="range" id="posterizeLevels" min="2" max="10" value="5">
+            </div>
+        </div>
+        
+        <!-- Edge Detection effect settings -->
+        <div id="edgeDetectionSettings" class="effect-settings" style="display: none;">
+            <div class="slider-container">
+                <label for="edgeSensitivity">Sensitivity <span id="edgeSensitivityValue" class="value-display">20</span></label>
+                <input type="range" id="edgeSensitivity" min="1" max="50" value="20">
+            </div>
+        </div>
+        
+        <button id="playBtn" disabled>Play/Pause</button>
+        <div id="status">Upload a video to begin</div>
+    </div>
+    
+    <div class="video-container">
+        <div class="video-box">
+            <div class="video-title">Original Video</div>
+            <video id="originalVideo" controls muted></video>
+        </div>
+        
+        <div class="video-box">
+            <div class="video-title">Effect Preview</div>
+            <canvas id="outputCanvas"></canvas>
+        </div>
+    </div>
+    
+    <div class="download-container">
+        <button id="downloadBtn" disabled>Download as MP4</button>
+        <p>Rendering progress: <span id="renderProgress">0%</span></p>
+    </div>
+    
+    <script>
+        // Get all necessary elements
+        const videoInput = document.getElementById('videoInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const playBtn = document.getElementById('playBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const originalVideo = document.getElementById('originalVideo');
+        const outputCanvas = document.getElementById('outputCanvas');
+        const ctx = outputCanvas.getContext('2d');
+        const statusDiv = document.getElementById('status');
+        const renderProgress = document.getElementById('renderProgress');
+        
+        // Get effect selector and settings containers
+        const effectType = document.getElementById('effectType');
+        const effectSettings = document.querySelectorAll('.effect-settings');
+        
+        // Get all sliders and their value displays
+        // Dots effect
+        const dotSizeSlider = document.getElementById('dotSize');
+        const dotSpacingSlider = document.getElementById('dotSpacing');
+        const thresholdSlider = document.getElementById('threshold');
+        const dotSizeValue = document.getElementById('dotSizeValue');
+        const dotSpacingValue = document.getElementById('dotSpacingValue');
+        const thresholdValue = document.getElementById('thresholdValue');
+        
+        // Gradient effect
+        const gradientColor1 = document.getElementById('gradientColor1');
+        const gradientColor2 = document.getElementById('gradientColor2');
+        const gradientOpacitySlider = document.getElementById('gradientOpacity');
+        const gradientDirectionSlider = document.getElementById('gradientDirection');
+        const gradientOpacityValue = document.getElementById('gradientOpacityValue');
+        const gradientDirectionValue = document.getElementById('gradientDirectionValue');
+        
+        // Pixelate effect
+        const pixelSizeSlider = document.getElementById('pixelSize');
+        const pixelSizeValue = document.getElementById('pixelSizeValue');
+        
+        // Glitch effect
+        const glitchIntensitySlider = document.getElementById('glitchIntensity');
+        const glitchFrequencySlider = document.getElementById('glitchFrequency');
+        const glitchIntensityValue = document.getElementById('glitchIntensityValue');
+        const glitchFrequencyValue = document.getElementById('glitchFrequencyValue');
+        
+        // Posterize effect
+        const posterizeLevelsSlider = document.getElementById('posterizeLevels');
+        const posterizeLevelsValue = document.getElementById('posterizeLevelsValue');
+        
+        // Edge Detection effect
+        const edgeSensitivitySlider = document.getElementById('edgeSensitivity');
+        const edgeSensitivityValue = document.getElementById('edgeSensitivityValue');
+        
+        // Set up initial values
+        let dotSize = parseInt(dotSizeSlider.value);
+        let dotSpacing = parseInt(dotSpacingSlider.value);
+        let threshold = parseInt(thresholdSlider.value);
+        let gradientOpacity = parseFloat(gradientOpacitySlider.value);
+        let gradientDirection = parseInt(gradientDirectionSlider.value);
+        let pixelSize = parseInt(pixelSizeSlider.value);
+        let glitchIntensity = parseInt(glitchIntensitySlider.value);
+        let glitchFrequency = parseInt(glitchFrequencySlider.value);
+        let posterizeLevels = parseInt(posterizeLevelsSlider.value);
+        let edgeSensitivity = parseInt(edgeSensitivitySlider.value);
+        
+        // For glitch effect
+        let glitchFrameCount = 0;
+        let lastGlitchFrame = 0;
+        let glitchData = null;
+        
+        // Event listener for effect type selection
+        effectType.addEventListener('change', function() {
+            // Hide all effect settings
+            effectSettings.forEach(setting => {
+                setting.style.display = 'none';
+            });
+            
+            // Show selected effect settings
+            const selectedEffect = effectType.value + 'Settings';
+            document.getElementById(selectedEffect).style.display = 'block';
+            
+            // Update preview if video is loaded
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        // Event listeners for all sliders
+        // Dots effect sliders
+        dotSizeSlider.addEventListener('input', function() {
+            dotSize = parseInt(this.value);
+            dotSizeValue.textContent = dotSize;
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        dotSpacingSlider.addEventListener('input', function() {
+            dotSpacing = parseInt(this.value);
+            dotSpacingValue.textContent = dotSpacing;
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        thresholdSlider.addEventListener('input', function() {
+            threshold = parseInt(this.value);
+            thresholdValue.textContent = threshold;
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        // Gradient effect sliders and color pickers
+        gradientColor1.addEventListener('input', function() {
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        gradientColor2.addEventListener('input', function() {
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        gradientOpacitySlider.addEventListener('input', function() {
+            gradientOpacity = parseFloat(this.value);
+            gradientOpacityValue.textContent = gradientOpacity;
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        gradientDirectionSlider.addEventListener('input', function() {
+            gradientDirection = parseInt(this.value);
+            gradientDirectionValue.textContent = gradientDirection + '°';
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        // Pixelate effect slider
+        pixelSizeSlider.addEventListener('input', function() {
+            pixelSize = parseInt(this.value);
+            pixelSizeValue.textContent = pixelSize;
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        // Glitch effect sliders
+        glitchIntensitySlider.addEventListener('input', function() {
+            glitchIntensity = parseInt(this.value);
+            glitchIntensityValue.textContent = glitchIntensity;
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        glitchFrequencySlider.addEventListener('input', function() {
+            glitchFrequency = parseInt(this.value);
+            glitchFrequencyValue.textContent = glitchFrequency;
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        // Posterize effect slider
+        posterizeLevelsSlider.addEventListener('input', function() {
+            posterizeLevels = parseInt(this.value);
+            posterizeLevelsValue.textContent = posterizeLevels;
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        // Edge Detection effect slider
+        edgeSensitivitySlider.addEventListener('input', function() {
+            edgeSensitivity = parseInt(this.value);
+            edgeSensitivityValue.textContent = edgeSensitivity;
+            if (originalVideo.src) {
+                processVideo();
+            }
+        });
+        
+        // Event listener for video upload
+        uploadBtn.addEventListener('click', function() {
+            if (videoInput.files.length > 0) {
+                const file = videoInput.files[0];
+                const fileURL = URL.createObjectURL(file);
+                originalVideo.src = fileURL;
+                
+                originalVideo.addEventListener('loadedmetadata', function() {
+                    // Set canvas dimensions to match video
+                    outputCanvas.width = originalVideo.videoWidth;
+                    outputCanvas.height = originalVideo.videoHeight;
+                    
+                    // Enable play button
+                    playBtn.disabled = false;
+                    downloadBtn.disabled = false;
+                    statusDiv.textContent = "Video loaded! Adjust settings and click Play";
+                });
+            }
+        });
+        
+        // Event listener for play/pause button
+        playBtn.addEventListener('click', function() {
+            if (originalVideo.paused) {
+                originalVideo.play();
+                statusDiv.textContent = "Processing video...";
+                requestAnimationFrame(processVideo);
+            } else {
+                originalVideo.pause();
+                statusDiv.textContent = "Paused";
+            }
+        });
+        
+        // Event listener for when video is playing
+        originalVideo.addEventListener('play', function() {
+            processVideo();
+        });
+        
+        originalVideo.addEventListener('pause', function() {
+            // Stop processing when video is paused
+        });
+        
+        // Event listener for download button
+        downloadBtn.addEventListener('click', async function() {
+            if (!originalVideo.src) {
+                return;
+            }
+            
+            // Disable download button while rendering
+            downloadBtn.disabled = true;
+            statusDiv.textContent = "Rendering video for download...";
+            
+            // Create MediaRecorder to record canvas
+            const stream = outputCanvas.captureStream(30); // 30 FPS
+            const mediaRecorder = new MediaRecorder(stream, {
+                mimeType: 'video/webm',
+                videoBitsPerSecond: 5000000 // 5 Mbps
+            });
+            
+            const chunks = [];
+            mediaRecorder.ondataavailable = function(e) {
+                if (e.data.size > 0) {
+                    chunks.push(e.data);
+                }
+            };
+            
+            mediaRecorder.onstop = function() {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                
+                // Convert to MP4 using client-side conversion
+                // Note: In a real implementation, server-side conversion might be more reliable
+                
+                // Use URL.createObjectURL for download
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'converted_video.webm'; // Most browsers can play WebM
+                document.body.appendChild(a);
+                a.click();
+                
+                // Clean up
+                setTimeout(function() {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    downloadBtn.disabled = false;
+                    statusDiv.textContent = "Download complete!";
+                    renderProgress.textContent = "0%";
+                }, 100);
+            };
+            
+            // Start recording
+            mediaRecorder.start();
+            
+            // Reset video to beginning
+            originalVideo.currentTime = 0;
+            originalVideo.play();
+            
+            // Track progress
+            const duration = originalVideo.duration;
+            const progressInterval = setInterval(() => {
+                const progress = Math.min(100, Math.floor((originalVideo.currentTime / duration) * 100));
+                renderProgress.textContent = progress + "%";
+            }, 100);
+            
+            // Process the entire video
+            originalVideo.addEventListener('ended', function onEnded() {
+                // Stop recording when video ends
+                mediaRecorder.stop();
+                originalVideo.removeEventListener('ended', onEnded);
+                clearInterval(progressInterval);
+            }, { once: true });
+        });
+        
+        // Function to process video frames
+        function processVideo() {
+            if (originalVideo.paused || originalVideo.ended) {
+                return;
+            }
+            
+            // Draw the current video frame to the canvas
+            ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+            
+            // Create temporary canvas for processing
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = outputCanvas.width;
+            tempCanvas.height = outputCanvas.height;
+            
+            // Draw video frame to temporary canvas
+            tempCtx.drawImage(originalVideo, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Process based on selected effect
+            switch (effectType.value) {
+                case 'dots':
+                    applyDotsEffect(tempCanvas, tempCtx);
+                    break;
+                case 'gradient':
+                    applyGradientEffect(tempCanvas, tempCtx);
+                    break;
+                case 'pixelate':
+                    applyPixelateEffect(tempCanvas, tempCtx);
+                    break;
+                case 'glitch':
+                    applyGlitchEffect(tempCanvas, tempCtx);
+                    break;
+                case 'posterize':
+                    applyPosterizeEffect(tempCanvas, tempCtx);
+                    break;
+                case 'edgeDetection':
+                    applyEdgeDetectionEffect(tempCanvas, tempCtx);
+                    break;
+            }
+            
+            // Request next animation frame
+            requestAnimationFrame(processVideo);
+        }
+        
+        // Function for dots effect
+        function applyDotsEffect(tempCanvas, tempCtx) {
+            // Get image data
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+            
+            // Draw dots
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
+            ctx.fillStyle = 'white';
+            
+            for (let y = 0; y < tempCanvas.height; y += dotSpacing) {
+                for (let x = 0; x < tempCanvas.width; x += dotSpacing) {
+                    const index = (y * tempCanvas.width + x) * 4;
+                    
+                    // Calculate brightness using luminance formula
+                    const r = data[index];
+                    const g = data[index + 1];
+                    const b = data[index + 2];
+                    const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+                    
+                    // Draw dot if brightness is above threshold
+                    if (brightness > threshold) {
+                        // Adjust dot size based on brightness
+                        const dotRadius = dotSize / 2 * (brightness / 255);
+                        ctx.beginPath();
+                        ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+        }
+        
+        // Function for gradient overlay effect
+        function applyGradientEffect(tempCanvas, tempCtx) {
+            // Draw original image to output canvas
+            ctx.drawImage(tempCanvas, 0, 0);
+            
+            // Create gradient
+            const startColor = gradientColor1.value;
+            const endColor = gradientColor2.value;
+            const radians = gradientDirection * Math.PI / 180;
+            
+            // Calculate gradient start and end points based on direction
+            const centerX = outputCanvas.width / 2;
+            const centerY = outputCanvas.height / 2;
+            const radius = Math.max(outputCanvas.width, outputCanvas.height);
+            
+            const startX = centerX - Math.cos(radians) * radius;
+            const startY = centerY - Math.sin(radians) * radius;
+            const endX = centerX + Math.cos(radians) * radius;
+            const endY = centerY + Math.sin(radians) * radius;
+            
+            const gradient = ctx.createLinearGradient(startX, startY, endX, endY);
+            gradient.addColorStop(0, startColor);
+            gradient.addColorStop(1, endColor);
+            
+            // Apply gradient overlay
+            ctx.globalCompositeOperation = 'overlay';
+            ctx.globalAlpha = gradientOpacity;
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
+            
+            // Reset composite operation
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 1.0;
+        }
+        
+        // Function for pixelate effect
+        function applyPixelateEffect(tempCanvas, tempCtx) {
+            // Draw pixelated image
+            // Method: Sample at regular intervals and draw rectangles
+            
+            for (let y = 0; y < tempCanvas.height; y += pixelSize) {
+                for (let x = 0; x < tempCanvas.width; x += pixelSize) {
+                    // Get color of one pixel in the block
+                    const pixelData = tempCtx.getImageData(x, y, 1, 1).data;
+                    
+                    // Fill a pixelSize x pixelSize rectangle with that color
+                    ctx.fillStyle = `rgb(${pixelData[0]}, ${pixelData[1]}, ${pixelData[2]})`;
+                    ctx.fillRect(x, y, pixelSize, pixelSize);
+                }
+            }
+        }
+        
+        // Function for glitch effect
+        function applyGlitchEffect(tempCanvas, tempCtx) {
+            // Draw original image first
+            ctx.drawImage(tempCanvas, 0, 0);
+            
+            // Increase frame counter
+            glitchFrameCount++;
+            
+            // Only apply glitch on certain frames determined by frequency
+            if (glitchFrameCount - lastGlitchFrame > 30 / glitchFrequency) {
+                lastGlitchFrame = glitchFrameCount;
+                
+                // Save current frame for glitching
+                glitchData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // Apply several random glitch effects
+                const numGlitches = Math.floor(Math.random() * glitchIntensity);
+                
+                for (let i = 0; i < numGlitches; i++) {
+                    // Random glitch type
+                    const glitchType = Math.floor(Math.random() * 3);
+                    
+                    switch (glitchType) {
+                        case 0: // Channel shift
+                            const shiftX = Math.floor(Math.random() * glitchIntensity * 2) - glitchIntensity;
+                            const channel = Math.floor(Math.random() * 3); // R, G, or B
+                            
+                            const channelData = ctx.getImageData(0, 0, outputCanvas.width, outputCanvas.height);
+                            for (let y = 0; y < outputCanvas.height; y++) {
+                                for (let x = 0; x < outputCanvas.width; x++) {
+                                    const sourceIndex = (y * outputCanvas.width + x) * 4;
+                                    const targetX = x + shiftX;
+                                    
+                                    if (targetX >= 0 && targetX < outputCanvas.width) {
+                                        const targetIndex = (y * outputCanvas.width + targetX) * 4;
+                                        channelData.data[targetIndex + channel] = glitchData.data[sourceIndex + channel];
+                                    }
+                                }
+                            }
+                            ctx.putImageData(channelData, 0, 0);
+                            break;
+                            
+                        case 1: // Horizontal stripes
+                            const stripHeight = Math.floor(Math.random() * 20) + 5;
+                            const stripStart = Math.floor(Math.random() * outputCanvas.height);
+                            const stripOffset = Math.floor(Math.random() * glitchIntensity * 2) - glitchIntensity;
+                            
+                            const stripeData = ctx.getImageData(0, stripStart, outputCanvas.width, stripHeight);
+                            
+                            // Shift stripe data horizontally
+                            const shiftedStripeData = new ImageData(outputCanvas.width, stripHeight);
+                            for (let y = 0; y < stripHeight; y++) {
+                                for (let x = 0; x < outputCanvas.width; x++) {
+                                    const sourceIndex = (y * outputCanvas.width + x) * 4;
+                                    const targetX = (x + stripOffset + outputCanvas.width) % outputCanvas.width;
+                                    const targetIndex = (y * outputCanvas.width + targetX) * 4;
+                                    
+                                    for (let c = 0; c < 4; c++) {
+                                        shiftedStripeData.data[targetIndex + c] = stripeData.data[sourceIndex + c];
+                                    }
+                                }
+                            }
+                            
+                            ctx.putImageData(shiftedStripeData, 0, stripStart);
+                            break;
+                            
+                        case 2: // Noise
+                            const noiseIntensity = Math.random() * 0.2 + 0.1;
+                            const noiseData = ctx.getImageData(0, 0, outputCanvas.width, outputCanvas.height);
+                            
+                            for (let i = 0; i < noiseData.data.length; i += 4) {
+                                if (Math.random() < noiseIntensity) {
+                                    noiseData.data[i] = Math.random() * 255;     // R
+                                    noiseData.data[i + 1] = Math.random() * 255; // G
+                                    noiseData.data[i + 2] = Math.random() * 255; // B
+                                }
+                            }
+                            
+                            ctx.putImageData(noiseData, 0, 0);
+                            break;
+                    }
+                }
+            }
+        }
+        
+        // Function for posterize effect
+        function applyPosterizeEffect(tempCanvas, tempCtx) {
+            // Get image data
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+            
+            // Create levels based on posterizeLevels value
+            const numLevels = posterizeLevels;
+            const levelStep = 255 / (numLevels - 1);
+            
+            // Apply posterize effect
+            for (let i = 0; i < data.length; i += 4) {
+                // Process each color channel
+                for (let c = 0; c < 3; c++) {
+                    // Find closest level
+                    const level = Math.round(data[i + c] / levelStep) * levelStep;
+                    // Set pixel to that level
+                    data[i + c] = Math.min(255, level);
+                }
+            }
+            
+            // Put processed data back to canvas
+            ctx.putImageData(imageData, 0, 0);
+        }
+        
+        // Function for edge detection effect
+        function applyEdgeDetectionEffect(tempCanvas, tempCtx) {
+            // Get image data
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+            const width = tempCanvas.width;
+            const height = tempCanvas.height;
+            
+            // Create output data
+            const outputData = new ImageData(width, height);
+            const output = outputData.data;
+            
+            // Edge detection kernel (Sobel operator)
+            // Apply simple edge detection algorithm
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    // Get pixel positions
+                    const topLeft = ((y - 1) * width + (x - 1)) * 4;
+                    const top = ((y - 1) * width + x) * 4;
+                    const topRight = ((y - 1) * width + (x + 1)) * 4;
+                    const left = (y * width + (x - 1)) * 4;
+                    const center = (y * width + x) * 4;
+                    const right = (y * width + (x + 1)) * 4;
+                    const bottomLeft = ((y + 1) * width + (x - 1)) * 4;
+                    const bottom = ((y + 1) * width + x) * 4;
+                    const bottomRight = ((y + 1) * width + (x + 1)) * 4;
+                    
+                    // Calculate horizontal and vertical gradients
+                    const gx = (
+                        -1 * data[topLeft] +
+                        0 * data[top] +
+                        1 * data[topRight] +
+                        -2 * data[left] +
+                        0 * data[center] +
+                        2 * data[right] +
+                        -1 * data[bottomLeft] +
+                        0 * data[bottom] +
+                        1 * data[bottomRight]
+                    );
+                    
+                    const gy = (
+                        -1 * data[topLeft] +
+                        -2 * data[top] +
+                        -1 * data[topRight] +
+                        0 * data[left] +
+                        0 * data[center] +
+                        0 * data[right] +
+                        1 * data[bottomLeft] +
+                        2 * data[bottom] +
+                        1 * data[bottomRight]
+                    );
+                    
+                    // Calculate gradient magnitude
+                    const magnitude = Math.sqrt(gx * gx + gy * gy);
+                    
+                    // Apply threshold
+                    const edgeValue = magnitude > edgeSensitivity ? 255 : 0;
+                    
+                    // Set output pixel
+                    const outIndex = center;
+                    output[outIndex] = edgeValue;     // R
+                    output[outIndex + 1] = edgeValue; // G
+                    output[outIndex + 2] = edgeValue; // B
+                    output[outIndex + 3] = 255;       // Alpha
+                }
+            }
+            
+            // Put processed data back to canvas
+            ctx.putImageData(outputData, 0, 0);
+        }
+    </script>
+</body>
+</html>
