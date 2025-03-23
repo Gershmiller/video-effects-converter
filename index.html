@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Video Effects Converter</title>
     <style>
         body {
@@ -128,6 +129,44 @@
         #downloadBtn:hover {
             background-color: #0b7dda;
         }
+        .blend-mode-selector {
+    margin-bottom: 15px;
+}
+.blend-mode-selector label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.blend-mode-selector select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: white;
+    font-size: 14px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .video-container {
+        flex-direction: column;
+    }
+    .video-box {
+        width: 100%;
+    }
+    video, canvas {
+        height: auto;
+        max-height: 50vh;
+        object-fit: contain;
+    }
+    .controls {
+        padding: 15px;
+    }
+    button {
+        padding: 12px 20px;
+        width: 100%;
+    }
+}
     </style>
 </head>
 <body>
@@ -189,6 +228,17 @@
             <div class="slider-container">
                 <label for="gradientDirection">Direction <span id="gradientDirectionValue" class="value-display">45°</span></label>
                 <input type="range" id="gradientDirection" min="0" max="360" value="45">
+            </div>
+            <div class="blend-mode-selector">
+                <label for="blendMode">Blend Mode</label>
+                <select id="blendMode">
+                    <option value="normal">Normal</option>
+                    <option value="multiply">Multiply</option>
+                    <option value="overlay" selected>Overlay</option>
+                    <option value="screen">Screen</option>
+                    <option value="color">Color</option>
+                    <option value="luminosity">Luminosity</option>
+                </select>
             </div>
         </div>
         
@@ -649,7 +699,12 @@
             gradient.addColorStop(1, endColor);
             
             // Apply gradient overlay
-            ctx.globalCompositeOperation = 'overlay';
+           // Get selected blend mode
+const blendModeSelect = document.getElementById('blendMode');
+const selectedBlendMode = blendModeSelect ? blendModeSelect.value : 'overlay';
+
+// Apply gradient overlay with selected blend mode
+ctx.globalCompositeOperation = selectedBlendMode;
             ctx.globalAlpha = gradientOpacity;
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
