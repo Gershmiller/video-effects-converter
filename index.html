@@ -159,6 +159,7 @@
         height: auto;
         max-height: 50vh;
         object-fit: contain;
+        pointer-events: none; /* This prevents the video from being clickable */
     }
     .controls {
         padding: 15px;
@@ -336,7 +337,7 @@
     <div class="video-container">
         <div class="video-box">
             <div class="video-title">Original Video</div>
-            <video id="originalVideo" controls muted></video>
+            <video id="originalVideo" controls muted playsinline webkit-playsinline disablePictureInPicture></video>
         </div>
         
         <div class="video-box">
