@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Video Effects Converter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -167,6 +168,44 @@
         width: 100%;
     }
 }
+.blend-mode-selector {
+    margin-bottom: 15px;
+}
+.blend-mode-selector label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.blend-mode-selector select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: white;
+    font-size: 14px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .video-container {
+        flex-direction: column;
+    }
+    .video-box {
+        width: 100%;
+    }
+    video, canvas {
+        height: auto;
+        max-height: 50vh;
+        object-fit: contain;
+    }
+    .controls {
+        padding: 15px;
+    }
+    button {
+        padding: 12px 20px;
+        width: 100%;
+    }
+}
     </style>
 </head>
 <body>
@@ -213,6 +252,17 @@
             <div class="color-picker-container">
                 <label for="gradientColor1">Start Color</label>
                 <input type="color" id="gradientColor1" value="#ff0000">
+                <div class="blend-mode-selector">
+                    <label for="blendMode">Blend Mode</label>
+                    <select id="blendMode">
+                        <option value="normal">Normal</option>
+                        <option value="multiply">Multiply</option>
+                        <option value="overlay" selected>Overlay</option>
+                        <option value="screen">Screen</option>
+                        <option value="color">Color</option>
+                        <option value="luminosity">Luminosity</option>
+                    </select>
+                </div> 
             </div>
             
             <div class="color-picker-container">
@@ -439,6 +489,14 @@
                 processVideo();
             }
         });
+        // Blend mode select
+if (document.getElementById('blendMode')) {
+    document.getElementById('blendMode').addEventListener('change', function() {
+        if (originalVideo.src) {
+            processVideo();
+        }
+    });
+}
         
         // Pixelate effect slider
         pixelSizeSlider.addEventListener('input', function() {
@@ -637,8 +695,10 @@
                     break;
             }
             
-            // Request next animation frame
-            requestAnimationFrame(processVideo);
+           // Schedule the next frame if video is playing
+if (!originalVideo.paused && !originalVideo.ended) {
+    requestAnimationFrame(processVideo);
+}
         }
         
         // Function for dots effect
